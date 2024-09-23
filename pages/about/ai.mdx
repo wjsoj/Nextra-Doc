@@ -1,1 +1,57 @@
-# lobechat
+# lobechat使用教程
+
+访问地址：[https://lobechat.pku3d.com](https://lobechat.pku3d.com)
+
+## 注册登录
+
+![错误示例](https://img-api.pku3d.com/ota/admin/rzq8CrJ4.png)
+
+首次使用或者遇到上图所示的报错时，需要进行登录验证授权。
+
+- PC：点击左上角头像，选择“登录/注册”，之后会跳转到统一身份认证页面，根据情况登录/注册即可。
+- 移动端：点击右下角“我”，选择“登录/注册”，之后会跳转到统一身份认证页面。移动端用户建议选择 **“安装浏览器应用 (PWA)”**，将网站PWA应用添加到桌面，可以获得接近原生APP的体验（如安装失败可能是浏览器不支持）。
+
+## 使用场景
+
+### 切换模型
+
+登录完成后会自动拉取服务器端设置的模型列表
+
+- PC：通过聊天框上方第一个按钮或对话框上方的模型列表选择对应模型，见下图示例：
+- 移动端：通过聊天框上方第一个按钮进行切换
+
+![admin/rH80gEBH.png](https://img-api.pku3d.com/ota/admin/rH80gEBH.png)
+
+### 多模态
+
+GPT-4o系列模型支持上传图片进行解析，借助LobeChat的知识库工具，可以实现对文档内容的提取和对话。
+
+常见使用场景：拍照翻译英文文档、文字公式识别、快速阅读文章等
+
+### 文生图
+
+借助LobeChat的插件功能（需在下图所示位置中勾选对应插件），可以使用OpenAI的Dall-E模型进行图片生成，只需要在聊天界面中输入“画”、“生成图片”等引导词，即可调用Dall-E模型生成图片。
+
+![admin/N35PB6gy.png](https://img-api.pku3d.com/ota/admin/N35PB6gy.png)
+
+除了Dall-E模型，我们还特别支持了由Stable Diffusion原班人马打造的开源模型[FLUX.1](https://replicate.com/blog/flux-state-of-the-art-image-generation)。建议文生图场景使用FLUX系列模型。
+
+**使用方法：** 在模型列表中选择对应模型，之后聊天框发送的每一条消息都会被视为图片生成的引导词，生成的图片及下载链接会在对话框中显示。
+
+Flux对中文提示词的指令遵循表现不佳，建议先使用大语言模型生成合适的提示词，再使用Flux生成图片。
+
+import { Callout } from 'nextra/components'
+
+<Callout type='info'>
+  Flux系列模型计算资源消耗较大，生成图片时间较长，请耐心等待，一般约10-30s完成生成。目前模型调用价格遵循官网定价，具体价格为：flux 0.01$/次、flux-dev 0.03$/次、flux-pro（目前闭源，质量最好） 0.05$/次，请勿滥用（ **然而陈老师都给大家报销了** ），建议先使用flux模型探索合适的提示词，最后使用flux-pro生成高质量图像。
+</Callout>
+
+**生成示例：**
+
+![admin/Z66QYglj.png](https://img-api.pku3d.com/ota/admin/Z66QYglj.png)
+
+## 常见问题
+
+1. 为什么我的模型列表里没有我想要的模型？
+    
+    如果之前自己设置过模型，会导致模型列表与服务器端不同步，可以在应用设置——通用设置中重置所有设置，即可重新拉取模型列表。
