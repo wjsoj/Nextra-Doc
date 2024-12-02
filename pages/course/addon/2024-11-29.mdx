@@ -1,0 +1,366 @@
+# 11.29 上机课
+
+## 判断题
+
+1. 字符串是一种不可变的数据类型。
+    **答案： 正确**
+
+> 在Python中有6个标准数据类型：Number（数字）、String（字符串）、List（列表）、Tuple（元组）、Set（集合）、Dictionary（字典）。其中List、Set、Dictionary是可变数据类型，Number、String、Tuple是不可变数据类型。
+> 可变数据类型 ：当该数据类型的对应变量的值发生了改变，那么它对应的内存地址不发生改变，对于这种数据类型，就称可变数据类型。
+
+2. 列表可以存储不同数据类型的元素。
+    **答案： 正确**
+
+> 例如`a = [1, 2, 'hello', 3.14]`
+
+3. 元组可以通过索引访问其内部元素。
+    **答案： 正确**
+
+4. 字典中的键可以是非唯一的。
+    **答案： 错误**
+
+5. 集合中的元素是有序的。
+    **答案： 错误**
+
+> 回顾集合相关的知识：数据是无序的、元素是唯一的、集合是可变数据类型
+
+## 单选题
+
+1. 下面代码的输出结果是：
+    
+    ```python
+    name = "Python语言程序设计"
+    print(name[2:])
+    ```
+    A. `ython语言程序设计`
+    B. `thon语言程序设计`
+    C. `thon语言程序`
+    D. `thon语言程序设`
+
+    **答案： B**
+
+2. Python语言属于( )
+
+    A. 机器语言
+    B. 汇编语言
+    C. 高级语言
+    D. 以上都不是
+
+    **答案： C**
+
+3. 用来完成一系列特定功能的指令叫作(    )
+
+    A. 算法
+    B. 程序
+    C. 语言
+    D. 文件
+
+    **答案： B**
+
+4. 使用助记符来代替机器语言的指令码,使机器语言符号化的语言是(    )。
+    
+    A. 机器语言
+    B. 高级语言
+    C. C语言
+    D. 汇编语言
+
+    **答案： D**
+
+## 填空题
+
+1. 在Python中，创建一个包含'apple', 'banana', 'cherry'的列表，代码应为：`my_list = ____`。
+
+    **答案： `['apple', 'banana', 'cherry']`**
+
+2. 在Python中，如何通过索引访问列表中的第一个元素？代码应为：`first_element = my_list[____]`。
+
+    **答案： `0`**
+
+3. 在Python中，创建一个包含'apple', 'banana', 'cherry'的元组，代码应为：`my_tuple = ____`。
+
+    **答案： `('apple', 'banana', 'cherry')`**
+
+4. 在Python中，如何创建一个包含键值对'key1': 'value1', 'key2': 'value2'的字典？代码应为：`my_dict = ____`。
+
+    **答案： `{'key1': 'value1', 'key2': 'value2'}`**
+
+5. 在Python中，如何创建一个包含'apple', 'banana', 'cherry'的集合？代码应为：`my_set = ____`。
+
+    **答案： `{'apple', 'banana', 'cherry'}`**
+
+## 编程题（参考答案与部分题解）
+
+import { Callout } from 'nextra/components'
+
+<Callout type='info'>
+编程题目的答案不是唯一的，能够通过评测即为正确
+</Callout>
+
+下面的题目顺序为选题时的主观难度顺序，具体配比为：简单题3道 + 中等难度4道 + 稍困难3道
+
+### 找最小值
+
+签到题
+
+```python copy
+n = int(input())
+a = [int(x) for x in input().split()]
+print(f"min = {min(a)}")
+```
+
+### 你的另一半
+
+考察枚举、整除的判断
+
+```python copy
+n = int(input())
+ans = 0
+for i in range(1,n):
+    if n%i == 0:
+        ans += i
+print(ans)
+```
+
+### 判断一年中的第几天
+
+输入注意用`-`来分割。注意闰年的判断条件，闰年的2月份有29天
+
+```python copy
+year, month, day = [int(x) for x in input().split("-")]
+amount = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+if year % 400 == 0 or (year % 4 == 0 and year % 100 != 0):
+    amount[1] += 1
+ans = sum(amount[:month - 1]) + day
+print(ans)
+```
+
+### 饮料换购
+
+（应该有一点递归的思想？）
+
+考察对循环逻辑的理解。本题的难点在于，每三个空瓶可以换购一瓶新的饮料，而每次换购新的饮料后，空瓶数目又会增加，这相当于又形成了一个新的换瓶子问题。循环的目的在于：只要当前瓶盖数大于3，就可以继续换购新的饮料。
+
+写出伪代码：
+
+```
+n = 当前手里的瓶盖数
+tot = 总共喝到的饮料数
+while 能够换购新的饮料:
+    n = 换购后得到的新瓶盖数 + 无法被换购的瓶盖数（余数）
+    tot += 新换购的饮料数
+输出 tot
+```
+
+我们用`n`代表瓶盖的数目，`tot`代表总共喝到的饮料数目。每次循环，我们将`n`除以3，得到的商`n//3`代表这一轮可以换购的新饮料数目，与将`n`除以3得到的余数`n%3`相加得到剩余的瓶盖数目（换购到的`n//3`）。最后将`n//3`加到`tot`上代表新增的饮料，这样就完成了一次换购的过程。
+
+```python copy
+n = int(input())
+tot = n
+while n >= 3:
+    tot += n//3
+    n = n//3 + n%3
+print(tot)
+```
+
+### 破解密码
+
+（本题是作为简单题选用的，但实际答题正确率不及预期）
+
+题目给出加密的方法，要求实现解密的代码。简单观察可以发现将密文字符串中偶数下标的字符和奇数下标的字符分别提取出来，然后拼接在一起就可以得到原文
+
+熟悉字符串切片的操作（这种方式应该最简单）
+
+```python copy
+ss = input()
+# 分离奇数下标和偶数下标的字符
+s1 = ss[::2]
+s2 = ss[1::2]
+print(s1+s2)
+```
+
+### 超级贪吃蛇
+
+简单的数学规律题，经过观察不难发现，输入网格尺寸$n$，输出结果`ans`需要满足：
+
+$$
+2^{ans} \leq n^2
+$$
+
+$$
+2^{ans+1} > n^2
+$$
+
+即此时的贪吃蛇长度已到达极限，再增长一次就会 **超出** （注意相等的情况）网格的尺寸。
+
+循环枚举找到符合条件的`ans`即可
+
+import { Tabs } from 'nextra/components'
+
+<Tabs items={['代码1','代码2','代码3']}>
+    <Tabs.Tab>
+        ```python copy
+        n = int(input())
+        now = 1
+        while True:
+            if 2**now <= n*n and 2**(now+1) > n*n:
+                print(now)
+                break
+            now += 1
+        ```
+    </Tabs.Tab>
+    <Tabs.Tab>
+        ```python copy
+        n = int(input())
+        now = 1
+        while 2**now <= n*n:
+            now += 1
+        print(now-1)
+        ```
+    </Tabs.Tab>
+    <Tabs.Tab>
+        ```python copy
+        n = int(input())
+        length = 1
+        step = 0
+        while length <= n*n:
+            length *= 2
+            step += 1
+        print(step-1)
+        ```
+    </Tabs.Tab>
+</Tabs>
+
+### 张三面试
+
+python的`count`方法可以大大简化代码，不需要手动计数
+
+学会使用条件语句维护最大值，这种通过遍历+条件语句的方式找到最大值的方法在很多问题中都会用到，相比使用`collections.Counter()`等方法，这种方法更加直观通用，也更加容易理解
+
+```python copy
+n = int(input())
+a = [int(x) for x in input().split()]
+sa = set(a)
+
+max_count = -1
+max_num = -1
+
+for num in sa:
+    if a.count(num) > max_count:
+        max_count = a.count(num)
+        max_num = num
+    elif a.count(num) == max_count and num > max_num:
+        max_num = num
+
+print(max_num, max_count)
+```
+
+### 质因数
+
+难点（偏数学）：在枚举质因数的时候，只要从小到大枚举，后边的合数都会提前被前边的质因数筛掉，所以不需要额外的合数筛选
+
+但本题应该并没有在时间复杂度上做要求，所以直接枚举质因数也可以完成此题，但相对来说写起来更麻烦，程序运行速度也更慢
+
+```python copy
+n = int(input())
+num = n
+now = 2
+result = []
+while n > 1:
+    if n%now == 0:
+        result.append(now)
+        n = n/now
+    else:
+        now += 1
+print(f"{num} = {'*'.join(map(str,result))}")
+```
+
+### 420、滚石问题
+
+注意石头的输入顺序代表石头的初始位置，先输入的在左边，正负号代表石头滚动的方向，正数代表向右，负数代表向左。可以理解一下下面几个样例：
+
+<Tabs items={['样例1','样例2','样例3','样例4']}>
+    <Tabs.Tab>
+        **输入**
+        ```
+        3
+        5 10 -2
+        ```
+        **输出**
+        ```
+        -10 -2
+        ```
+    </Tabs.Tab>
+    <Tabs.Tab>
+        **输入**
+        ```
+        3
+        5 -2 10
+        ```
+        **输出**
+        ```
+        -10
+        ```
+    </Tabs.Tab>
+    <Tabs.Tab>
+        **输入**
+        ```
+        2
+        -10 10
+        ```
+        **输出**
+        ```
+        -10 10
+        ```
+    </Tabs.Tab>
+    <Tabs.Tab>
+        **输入**
+        ```
+        2
+        10 -10
+        ```
+        **输出**
+        ```
+        ```
+    </Tabs.Tab>
+</Tabs>
+
+```python copy
+n = int(input())
+stone = [int(x) for x in input().split()]
+
+flag = True
+
+while flag:
+    flag = False
+    for i in range(len(stone)-1):
+        if stone[i]> 0 and stone[i+1]<0:
+            flag = True
+            if stone[i] > abs(stone[i+1]):
+                stone.pop(i+1)
+            elif stone[i] < abs(stone[i+1]):
+                stone.pop(i)
+            else:
+                stone.pop(i)
+                stone.pop(i)
+
+print(' '.join(map(str, stone)))
+```
+
+### 办活动 - 1
+
+```python
+n = int(input())
+time_arr = [[int(x) for x in input().split()] for i in range(n)]
+time_arr.sort(key=lambda x: (x[0], x[1]))
+# 贪心，如果两个时间区间有交集，取结束时间最早的那个
+endtime = time_arr[0][1]
+count = 0
+for i in range(1, n):
+    if time_arr[i][0] < endtime:
+        count += 1
+        endtime = min(endtime, time_arr[i][1])
+    else:
+        endtime = time_arr[i][1]
+
+print(count)
+```

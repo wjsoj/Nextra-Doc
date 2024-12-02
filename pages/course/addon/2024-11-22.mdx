@@ -1,0 +1,232 @@
+# 11.22 上机课
+
+## Slide
+
+**建议阅读作业相关提醒**
+
+import { Cards } from 'nextra/components'
+
+<Cards>
+  <Cards.Card
+    title="View Slide"
+    arrow
+    href="https://slides.pku3d.com/2024-11-22"
+    target='_blank'
+  />
+</Cards>
+
+import { Callout } from 'nextra/components'
+
+<Callout type='warning'>
+文档正在施工中，还在找更好的例子
+</Callout>
+
+## 浏览器调试工具（Devtools）使用
+
+由于上机课使用Firefox浏览器进行演示，这里采用Chromium浏览器（Chrome、Edge类似）进行演示。
+
+### 简介
+
+**打开方式**：按`F12`或`Ctrl+Shift+I`打开，或者按照右上角菜单`更多工具`-`开发者工具`打开（如下图所示）
+
+<img className='lg:w-1/2 mt-2' src="https://img-api.pku3d.com/ota/admin/nX15QkL2.png" alt="admin/nX15QkL2.png" />
+
+**建议了解的功能**：
+
+1. 元素/Elements：查看网页源代码、样式，主要用于定位和查看元素结构
+
+![admin/3Hc5wk2y.png](https://img-api.pku3d.com/ota/admin/3Hc5wk2y.png)
+
+2. 网络/Network：查看网页请求、响应，主要用于查看网页加载情况以及对涉及后端请求的数据进行抓包，图中标识了浏览器开发者工具常用的功能对应的按键位置
+
+![admin/uRxCN0BI.png](https://img-api.pku3d.com/ota/admin/uRxCN0BI.png)
+
+3. 元素选择工具：用于定位元素，点击后鼠标移动到网页上即可在查看器中定位到对应元素
+4. 响应式设计模式：用于模拟不同设备的显示效果，方便调试响应式设计（网页在不同尺寸手机/平板/电脑屏幕下的显示效果）
+
+## 简单爬虫编写实例
+
+<Callout type='warning'>
+爬虫行为存在一定的法律风险，仅供学习和研究使用，请在保证不对目标网站造成影响的情况下练习
+</Callout>
+
+### 静态页面（从HTML文档中提取）
+
+**示例场景：**从北京大学房地产管理部官网[http://fdcb.pku.edu.cn/fwck/wwbh/wwxx_wwbh/index.htm](http://fdcb.pku.edu.cn/fwck/wwbh/wwxx_wwbh/index.htm)上爬取校内文物信息，为了方便演示，下边的演示仅爬取了第一页的数据，如果需要爬取多页，循环访问链接即可
+
+将鼠标悬停到文物名称上，发现每一个文物都指向一个详情页，详情页的格式为`http://fdcb.pku.edu.cn/fwck/wwbh/wwxx_wwbh/1300862.htm`，可以发现后边的数字是每一个文物的唯一标识，可以通过这个标识来访问详情页，所以可将目标拆解为：
+
+1. 访问首页，获取文物列表，提取每一个文物的链接
+2. 访问每一个文物的链接，提取文物的详细信息
+
+#### 获取链接列表
+
+检查元素，发现文物列表位于一个类名为`article`的容器（`div`）中，为了验证使用类名能否唯一定位到这个容器，可以在查看器中使用`Ctrl+F`搜索`.article`（这里的`.`表示使用类名选择器），多按几次`Enter`键，发现始终只有一个结果，说明这个类名是唯一的，可以使用这个类名来定位到文物列表
+
+![admin/526sYEZq.png](https://img-api.pku3d.com/ota/admin/526sYEZq.png)
+
+观察结构，发现在这个容器下有一个`ul`（unordered list）标签，里边有多个`li`（list item）标签，每一个`li`标签内部又有一个`a`标签，这个`a`标签就是文物的链接，我们不用自己编写选择器/正则表达式来提取这个链接，可以借助ai。为此，我们先复制整个`article`容器的HTML代码，方法是在查看器中右键`复制(Copy)`-`复制Outer HTML`（这样可以包含自身标签），然后得到如下内容（为了方便演示，删除了部分`li`标签，事实上ai理解能力很强，也不需要把所有重复格式的标签都提供给它）：
+
+<img className='mt-2 lg:w-2/3' src="https://img-api.pku3d.com/ota/admin/6teDAXT9.png" alt="admin/6teDAXT9.png" />
+
+```html
+<div class="article">
+  <ul class="item-list">
+                        <li>
+        <a href="1300862.htm">燕南园 The Yannan Garden</a>
+        <span class="s-dt pku-red"> 2019-04-08</span>
+      </li>
+                        <li>
+        <a href="1293933.htm">西校门 The West School Gate</a>
+        <span class="s-dt pku-red"> 2017-07-26</span>
+      </li>
+                        <li>
+        <a href="1293922.htm">校友桥 Alumni Bridge</a>
+        <span class="s-dt pku-red"> 2017-07-26</span>
+      </li>
+                        <li>
+        <a href="1293903.htm">博雅塔 Bo Ya Pagoda</a>
+        <span class="s-dt pku-red"> 2017-07-26</span>
+      </li>
+                        <li>
+        <a href="1293902.htm">办公楼 Administrative Building</a>
+        <span class="s-dt pku-red"> 2017-07-26</span>
+      </li>
+                    </ul>
+  <br>
+</div>
+```
+
+构建AI提示词如下：
+
+````markdown
+
+请帮我编写爬虫，从http://fdcb.pku.edu.cn/fwck/wwbh/wwxx_wwbh/index.htm爬取文物列表，提取每一个文物的链接
+
+```html
+<div class="article">
+  <ul class="item-list">
+                        <li>
+        <a href="1300862.htm">燕南园 The Yannan Garden</a>
+        <span class="s-dt pku-red"> 2019-04-08</span>
+      </li>
+                        <li>
+        <a href="1293933.htm">西校门 The West School Gate</a>
+        <span class="s-dt pku-red"> 2017-07-26</span>
+      </li>
+                        <li>
+        <a href="1293922.htm">校友桥 Alumni Bridge</a>
+        <span class="s-dt pku-red"> 2017-07-26</span>
+      </li>
+                        <li>
+        <a href="1293903.htm">博雅塔 Bo Ya Pagoda</a>
+        <span class="s-dt pku-red"> 2017-07-26</span>
+      </li>
+                        <li>
+        <a href="1293902.htm">办公楼 Administrative Building</a>
+        <span class="s-dt pku-red"> 2017-07-26</span>
+      </li>
+                    </ul>
+  <br>
+</div>
+```
+
+对于每一个链接，拼接得到完整的URL，例如http://fdcb.pku.edu.cn/fwck/wwbh/wwxx_wwbh/1300862.htm，然后访问这个链接，提取文物的详细信息，下面是两个页面格式示例：
+
+```html
+<div class="pageArticle">
+  <div class="articleTitle">
+    <h2>治贝子园 The Zhibeizi Garden</h2>
+    2019-04-08
+  </div>
+
+  <div class="article">
+    <br>
+    <h3><img alt="" src="../../../images/content/2019-04/20190408163412556105.jpg" style="width: 500px; height: 269px;"></h3>
+
+<h3><span style="font-size:12px;"><strong>治贝子园 The Zhibeizi Garden</strong><br>
+文物位置：在第四教学楼东、邱德拔体育馆西侧<br>
+文物类别：建筑遗迹<br>
+Location: between classroom building No. 4 and the Qiudeba Gymnasium<br>
+Category: Architectural relics</span></h3>
+
+<div>&nbsp;</div>
+
+<div><span style="font-size:12px;">文物特色<br>
+&nbsp; &nbsp; &nbsp; 治贝子园门口立有一尊老子汉白玉石雕立像，古色古香，门牌“治贝子园”四字为季羡林所题写。治贝子园曾占地四顷，有房屋 139 间，树木逾 800 棵，现在只余一座两进的四合院。修缮后的院子仍然保留了传统合院南北向的建筑格局以及卷棚硬山顶、灰色砖墙面的传统建筑风格，掩映在邱德拔体育馆、第四教学楼等现代建筑之间，显得格外典雅。</span></div>
+
+<div>&nbsp;</div>
+
+<div><span style="font-size:12px;">历史溯源<br>
+&nbsp; &nbsp; &nbsp; 治贝子园最早因主人为清宗室贝子载治而得名，后由载治之子溥侗继承，称“红豆馆”。溥侗对昆曲、京剧造诣很深，常在治贝子园内与票友唱戏交流，因此“红豆馆”也在中国近代戏曲史上具有重要的地位。1928年治贝子园为燕京大学拍卖而得，作为农场使用，故又名“燕农园”。1995 年，经台湾学者陈鼓应呼吁，台湾友人雷永泰、陈金发捐资修缮了治贝子园。园内有一石盆，疑为清代文物。</span></div>
+
+<div>&nbsp;</div>
+
+<div><span style="font-size:12px;">Distinguishing feature<br>
+&nbsp; &nbsp; &nbsp; If you walk behind the classroom building No. 4, you will find a marble statue of Lao zi and the Zhibeizi Garden. The door plate "Zhibeizi Garden" is written by Ji Xianlin. The Zhibeizi Garden once occupied an area of four hectares, with 139 houses and more than 800 trees, while now there is only a two-in courtyard. The renovated courtyard still retains the architectural pattern of the traditional courtyard heading from South to North and follows the simple and unadorned yet elegant style of traditional Chinese buildings.</span></div>
+
+<div>&nbsp;</div>
+
+<div><span style="font-size:12px;">History<br>
+&nbsp; &nbsp; &nbsp; The name of this garden came from its first master, the royal family member Zaizhi. In 1928, this garden was bought by Yenching University from an auction, and was later used as farmland, which is why it is also called the Nongyuan Garden. In 1995, this garden was renovated.</span></div>
+
+<div>&nbsp;</div>
+
+  </div>
+  
+  
+  <div class="Annex">
+                  </div>
+</div>
+```
+
+```html
+<div class="pageArticle">
+  <div class="articleTitle">
+    <h2>旗杆座（1934） Flagpole Seat (1934)</h2>
+    2019-04-08
+  </div>
+
+  <div class="article">
+    <br>
+    <h3><img alt="" src="../../../images/content/2019-04/20190408162012038860.jpg" style="width: 500px; height: 666px;"></h3>
+
+<h3><span style="font-size:12px;"><strong>旗杆座（1934） Flagpole Seat (1934)</strong><br>
+文物位置：未名湖南岸的慈济寺山门东西两侧<br>
+文物类别：建筑遗迹<br>
+Location: On the south bank of the Weiming Lake and on both sides of the gate of the Ciji Temple<br>
+Category: Architectural relics<br>
+&nbsp;</span></h3>
+
+<h3><span style="font-size:12px;">文物特色<br>
+&nbsp; &nbsp; &nbsp; 未名湖南岸的慈济寺山门东西两侧有一对旗杆座。这对旗杆座形制相同，均为石质。上部呈须弥座形，上枭混部饰叶纹，腰部饰覆仰莲瓣，中夹连珠纹，下枋饰云纹；下部为正方形体，一面有铭文“一九三四班留校纪念”；上下部之间有铁箍一周。</span></h3>
+
+<div>&nbsp;</div>
+
+<div><span style="font-size:12px;">历史溯源<br>
+&nbsp; &nbsp; &nbsp; 据铭文，这对旗杆座应为燕京大学 1934 班学生毕业时赠给母校的纪念物。</span></div>
+
+<div>&nbsp;</div>
+
+<div><span style="font-size:12px;">Distinguishing feature<br>
+&nbsp; &nbsp; &nbsp; On the south bank of the Weiming Lake and on both sides of the gate of the Ciji Temple stand a couple of flagpole seats. Both are made of stone with the same structure. The upper part is in the shape of a sumeru pedestal, of which the upper cyma is decorated with leaf patterns, the suyao with inverted and upward lotus petal patterns mixed with linked-pearl patterns in the middle, and the lower fillet and fascia with cloud patterns. The lower part is cubic. On one side there is the inscription “Souvenir of Class 1934”. Between the upper and lower part is an iron hoop.</span></div>
+
+<div>&nbsp;</div>
+
+<div><span style="font-size:12px;">History<br>
+&nbsp; &nbsp; &nbsp; Judging from the inscription, this pair of seats must be a gift to the University by Class 1934.</span></div>
+
+<div>&nbsp;</div>
+
+  </div>
+  
+  
+  <div class="Annex">
+                  </div>
+</div>
+```
+
+提取要求：去除空白字符
+
+仅使用python requests库和re库，不要使用BeautifulSoup，保存为csv文件
+````

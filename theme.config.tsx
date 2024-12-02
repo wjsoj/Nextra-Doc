@@ -12,7 +12,7 @@ const config: DocsThemeConfig = {
   // },
   docsRepositoryBase: 'https://github.com/wjsoj/Nextra-Doc',
   footer: {
-    text: (
+    content: (
       <div>
         2024年秋季计算概论（C）Python 2班 课程团队
         <br />
@@ -22,7 +22,7 @@ const config: DocsThemeConfig = {
   },
   banner: {
     key: '文档施工中',
-    text: '🎉 计算概论课程文档站现已发布，更多内容正在施工中',
+    content: (<span>'🎉 计算概论课程文档站现已发布，更多内容正在施工中'</span>),
   }
 }
 

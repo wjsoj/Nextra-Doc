@@ -1,7 +1,10 @@
-const withNextra = require('nextra')({
-  theme: 'nextra-theme-docs',
-  themeConfig: './theme.config.tsx',
-  latex: true,
-})
+// next.config.js
+module.exports = async () => {
+  const withNextra = (await import('nextra')).default({
+    theme: 'nextra-theme-docs',
+    themeConfig: './theme.config.tsx',
+    latex: true,
+  });
 
-module.exports = withNextra()
+  return withNextra();
+};
