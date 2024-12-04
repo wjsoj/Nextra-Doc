@@ -1,5 +1,7 @@
 # 11.29 上机课
 
+import { Callout } from 'nextra/components'
+
 ## 判断题
 
 1. 字符串是一种不可变的数据类型。
@@ -66,6 +68,8 @@
 
     **答案： D**
 
+> 汇编语言的特点是用符号代替了机器指令代码，而且助记符与指令代码一一对应，基本保留了机器语言的结构和特点。
+
 ## 填空题
 
 1. 在Python中，创建一个包含'apple', 'banana', 'cherry'的列表，代码应为：`my_list = ____`。
@@ -90,13 +94,18 @@
 
 ## 编程题（参考答案与部分题解）
 
-import { Callout } from 'nextra/components'
-
 <Callout type='info'>
 编程题目的答案不是唯一的，能够通过评测即为正确
+
+编程题题目选择&题解编写：@卫家燊
 </Callout>
 
+本次模拟考试的编程题目是由wjs助教精挑细选（~~指周四晚上才开始找题~~）出来的经典好题（~~指看着顺眼~~），萌新友好（~~提供签到题~~）、难度富有梯度（~~甚至可以超纲~~），能够充分满足考察课程基础知识点的需要（~~指很有可能正交~~）
+
 下面的题目顺序为选题时的主观难度顺序，具体配比为：简单题3道 + 中等难度4道 + 稍困难3道
+
+（实际上后面两道题的难度远远超过了前面的题目，主要是出于控制难度的需要，给提前做完的同学找点事干）
+
 
 ### 找最小值
 
@@ -168,7 +177,7 @@ print(tot)
 
 题目给出加密的方法，要求实现解密的代码。简单观察可以发现将密文字符串中偶数下标的字符和奇数下标的字符分别提取出来，然后拼接在一起就可以得到原文
 
-熟悉字符串切片的操作（这种方式应该最简单）
+考察字符串切片的操作（这种方式应该最简单）
 
 ```python copy
 ss = input()
@@ -236,23 +245,48 @@ python的`count`方法可以大大简化代码，不需要手动计数
 
 学会使用条件语句维护最大值，这种通过遍历+条件语句的方式找到最大值的方法在很多问题中都会用到，相比使用`collections.Counter()`等方法，这种方法更加直观通用，也更加容易理解
 
-```python copy
-n = int(input())
-a = [int(x) for x in input().split()]
-sa = set(a)
+另外提供了一种比较秀的方法，可以大幅压缩代码量
 
-max_count = -1
-max_num = -1
+<Tabs items={['代码1','代码2']}>
+    <Tabs.Tab>
+        ```python copy
+        n = int(input())
+        a = [int(x) for x in input().split()]
+        sa = set(a) # 利用集合来去重
 
-for num in sa:
-    if a.count(num) > max_count:
-        max_count = a.count(num)
-        max_num = num
-    elif a.count(num) == max_count and num > max_num:
-        max_num = num
+        # 初始化最大值为一个非常小的数
+        max_count = -1 # count必然大于0,所以-1就够用了
+        max_num = -9999999
 
-print(max_num, max_count)
-```
+        for num in sa:
+            # 如果当前数字的出现次数大于最大值，更新最大值
+            if a.count(num) > max_count:
+                max_count = a.count(num)
+                max_num = num
+            elif a.count(num) == max_count and num > max_num:
+                # 重复出现的次数相等时，取数字最大的那一个
+                max_num = num
+
+        print(max_num, max_count)
+        ```
+    </Tabs.Tab>
+    <Tabs.Tab>
+        ```python copy
+        n = int(input())
+        a = [int(x) for x in input().split()]
+        # 统计出现次数，转换为字典
+        d = {x: a.count(x) for x in a}
+        """
+        一种很秀的写法：对字典取max会返回最大的键值
+        lambda x: func(x)语法表示定义一个匿名函数，返回func(x)语句的值
+        key=lambda x: (d[x], x)表示先按照值排序，再按照键排序，
+        这样就能确保返回出现次数最多的数字中最大的数字
+        """
+        num = max(d, key=lambda x: (d[x], x))
+        print(num, d[num])
+        ```
+    </Tabs.Tab>
+</Tabs>
 
 ### 质因数
 
@@ -324,6 +358,26 @@ print(f"{num} = {'*'.join(map(str,result))}")
     </Tabs.Tab>
 </Tabs>
 
+解题的关键在于：我们可以发现，如果当前石头大小的数组中存在相邻的两个数，满足：**前一个数大于0，后一个数小于0**，则两个石头必定相撞。当找不到这样的组合时，剩下的石头都会保留。
+
+理解了这一点，这道题的解题方式就和**饮料换购**那道题一样了，即设计循环，每一次找到符合条件的相邻的石头，就模拟相撞的过程，删掉其中一块或全部，直到找不到相邻的石头为止。
+
+写出伪代码如下：
+
+```
+输入n
+输入代表n个石头的数组（同时包含位置、大小、方向信息）
+
+while 存在可以相撞的石头：
+    for 循环遍历:
+        if 当前石头和下一个石头可以相撞:
+            根据不同的大小关系，完成相撞过程
+
+输出剩下的石头
+```
+
+翻译成代码：
+
 ```python copy
 n = int(input())
 stone = [int(x) for x in input().split()]
@@ -340,6 +394,7 @@ while flag:
             elif stone[i] < abs(stone[i+1]):
                 stone.pop(i)
             else:
+                # 这里第一次pop会改变数组的长度，所以两次都是i
                 stone.pop(i)
                 stone.pop(i)
 
@@ -348,15 +403,27 @@ print(' '.join(map(str, stone)))
 
 ### 办活动 - 1
 
-```python
+<Callout type='warning'>
+本题涉及基础的算法竞赛内容（贪心算法），原则上不可能在考试中出现
+</Callout>
+
+核心思想：贪心。简单理解：对于当下每一次选择，都考虑对我当前而言最有利的选择，而不去考虑对未来的影响。贪心要求问题具有**最优子结构**的特点，即问题可以拆成若干个子问题，每个子问题的最优解可以推导出原问题的最优解。
+
+本题的贪心策略是：如果两个时间区间有交集，取结束时间最早的那个（这样就可以使得空余的时间更多，也更有可能容纳更多的活动）。贪心的性质在直觉上很容易理解：只考虑眼前两个有重叠的活动，如果有某个活动与这两个活动都重叠/都不重叠，那么选哪个并没有影响，但如果有重叠，肯定选结束时间最早的那个活动最划算，多余的那个删掉，这样才能留出更多的时间给其他活动。
+
+为什么这道题的通过率会比滚石问题高？我还以为这道题是最难的...
+
+```python copy
 n = int(input())
 time_arr = [[int(x) for x in input().split()] for i in range(n)]
+# 字典排序，优先按x[0]排，再按x[1]排
 time_arr.sort(key=lambda x: (x[0], x[1]))
-# 贪心，如果两个时间区间有交集，取结束时间最早的那个
+# 贪心，如果两个时间区间有交集，取结束时间最早的那个，删掉另一个
 endtime = time_arr[0][1]
 count = 0
 for i in range(1, n):
     if time_arr[i][0] < endtime:
+        # 有重叠，必然要删掉一个
         count += 1
         endtime = min(endtime, time_arr[i][1])
     else:
