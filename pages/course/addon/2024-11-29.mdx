@@ -109,6 +109,8 @@ import { Callout } from 'nextra/components'
 
 ### 找最小值
 
+[题目链接](https://www.educoder.net/problems/m8f6tqkxn5he/oj/ho78f3xa)
+
 签到题
 
 ```python copy
@@ -118,6 +120,8 @@ print(f"min = {min(a)}")
 ```
 
 ### 你的另一半
+
+[题目链接](https://www.educoder.net/problems/xkq8pcib54yl/oj/yelxufrt)
 
 考察枚举、整除的判断
 
@@ -132,6 +136,8 @@ print(ans)
 
 ### 判断一年中的第几天
 
+[题目链接](https://www.educoder.net/problems/eb7vxns2r846/oj/zf6csxof)
+
 输入注意用`-`来分割。注意闰年的判断条件，闰年的2月份有29天
 
 ```python copy
@@ -144,6 +150,8 @@ print(ans)
 ```
 
 ### 饮料换购
+
+[题目链接](https://www.educoder.net/problems/5akf9nmblj6c/oj/vb4cf5r8)
 
 （应该有一点递归的思想？）
 
@@ -173,6 +181,8 @@ print(tot)
 
 ### 破解密码
 
+[题目链接](https://www.educoder.net/problems/v9eopn48qwhg/oj/zw239sck)
+
 （本题是作为简单题选用的，但实际答题正确率不及预期）
 
 题目给出加密的方法，要求实现解密的代码。简单观察可以发现将密文字符串中偶数下标的字符和奇数下标的字符分别提取出来，然后拼接在一起就可以得到原文
@@ -188,6 +198,8 @@ print(s1+s2)
 ```
 
 ### 超级贪吃蛇
+
+[题目链接](https://www.educoder.net/problems/qbhonvc8p9rj/oj/ke6tmuas)
 
 简单的数学规律题，经过观察不难发现，输入网格尺寸$n$，输出结果`ans`需要满足：
 
@@ -241,6 +253,8 @@ import { Tabs } from 'nextra/components'
 
 ### 张三面试
 
+[题目链接](https://www.educoder.net/problems/o3n9wuali2ef/oj/lmehg4pn)
+
 python的`count`方法可以大大简化代码，不需要手动计数
 
 学会使用条件语句维护最大值，这种通过遍历+条件语句的方式找到最大值的方法在很多问题中都会用到，相比使用`collections.Counter()`等方法，这种方法更加直观通用，也更加容易理解
@@ -290,6 +304,8 @@ python的`count`方法可以大大简化代码，不需要手动计数
 
 ### 质因数
 
+[题目链接](https://www.educoder.net/problems/qcufn8v4lrsp/oj/mo9fzqge)
+
 难点（偏数学）：在枚举质因数的时候，只要从小到大枚举，后边的合数都会提前被前边的质因数筛掉，所以不需要额外的合数筛选
 
 但本题应该并没有在时间复杂度上做要求，所以直接枚举质因数也可以完成此题，但相对来说写起来更麻烦，程序运行速度也更慢
@@ -309,6 +325,8 @@ print(f"{num} = {'*'.join(map(str,result))}")
 ```
 
 ### 420、滚石问题
+
+[题目链接](https://www.educoder.net/problems/t6wzumi3qvjx/oj/8uq5xow9)
 
 注意石头的输入顺序代表石头的初始位置，先输入的在左边，正负号代表石头滚动的方向，正数代表向右，负数代表向左。可以理解一下下面几个样例：
 
@@ -402,6 +420,8 @@ print(' '.join(map(str, stone)))
 ```
 
 ### 办活动 - 1
+
+[题目链接](https://www.educoder.net/problems/9as8jo4g6qfi/oj/9l82w3qh)
 
 <Callout type='warning'>
 本题涉及基础的算法竞赛内容（贪心算法），原则上不可能在考试中出现
