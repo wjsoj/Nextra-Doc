@@ -22,7 +22,7 @@ const config: DocsThemeConfig = {
   },
   banner: {
     key: '文档施工中',
-    content: (<span>'🎉 计算概论课程文档站现已发布，更多内容正在施工中'</span>),
+    content: (<span>🎉 2024年秋季学期已结束，文档站进入归档状态</span>),
   }
 }
 

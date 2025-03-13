@@ -1,0 +1,206 @@
+# 关于某大学的DeepSeek AI应用
+
+> 本文包含两部分内容：
+> 1. 对某大学计算中心一如既往高水准的开发能力进行锐评； 
+> 2. 如何搭建接口白嫖某大学的DeepSeek R1接口；
+
+import { Callout } from 'nextra/components'
+
+<Callout type='warning'>
+  本文仅供学习交流使用，包含一些主观判断，部分内容可能会使某些人破防。此外调用接口方式本质上属于攻击手段的一种，请不要向利益相关者传播。
+</Callout>
+
+## 关于前端页面数学公式渲染的问题
+
+经过简单尝试发现，某大学近期上线的AI应用，包括[DeepSeek](https://deepseek.pku.edu.cn/)、[大模型试验场](https://llmtest.pku.edu.cn/)等，均无法进行AI流式输出的数学公式渲染，经测试结果如下：
+
+![数学公式无法正常渲染](https://img-api.pku3d.com/ota/admin/Py7qfNFy.png)
+
+利用Wappalyzer查看，发现某大学DeepSeek网站采用如下技术栈：Next.js + styled-components + Webpack，考虑到React生态下常用的处理markdown文本的方案为react-markdown插件，挖掘js代码，果然发现某大学在项目中采用了react-markdown + remark-math + KaTex的方式处理数学公式渲染（前端拿到的代码中容易发现相关插件的痕迹）：
+
+![代码截图](https://img-api.pku3d.com/ota/admin/IZOODGAn.png)
+
+恰巧我之前有过类似项目的经历，在使用这种方式渲染数学公式时，会引发一个问题：**默认只有`$`符号包裹的行内和行间公式会被渲染，而大模型常用的`\(` `\[`标记不会被remark-math识别转换**
+
+而`remark-math`插件的开发团队目前并没有增加此配置项的打算，具体讨论详见github issue：[remark-math#39](https://github.com/remarkjs/remark-math/issues/39)
+
+此问题的解决方案非常简单，更改核心库的代码，添加`\(`、`\[`的匹配即可，但这种方式不利于项目维护。好在github上已经有用户提供了简单的解决方案，只需要在打包工具配置文件中，将核心库用alias的方式替换即可，详见[micromark-extension-llm-math
+](https://github.com/ofk/micromark-extension-llm-math)，例如在我的项目中，我使用了如下配置文件进行替换：
+
+```ts filename="next.config.ts" copy
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+  experimental: {
+    turbo: {
+      resolveAlias: {
+        'micromark-extension-math': 'micromark-extension-llm-math'
+      }
+    }
+  }
+};
+
+export default nextConfig;
+```
+
+这里我使用的是较新的turbopack，故需要通过`experimental`字段设置，如果像某大学一样使用webpack，只需要按照项目文档简单添加即可。
+
+由以上分析不难看出某大学在网页开发方面的高水准，不知道这个问题又需要多长时间来修复呢？
+
+### 一些历史记录
+
+作为参考，曾经某大学预约入校网站的确认框会超出移动端窗口宽度，但凡是一个用过Element UI的人，都知道这个UI框架并非为移动端设计的，在移动端使用需要慎之又慎，而这一问题的解决方案网上一搜就有[一大堆](https://blog.csdn.net/qq_42852004/article/details/106071287)，但某大学搞出来就是这样的（原图找不到了，有我和朋友在24年1月份的聊天记录为证）：
+
+![admin/iFzgaf4F.jpg](https://img-api.pku3d.com/ota/admin/iFzgaf4F.jpg)
+
+据我主观观察统计，计算中心花了接近半年的时间才发现并解决了这个问题，堪称业界良心。
+
+**那么为什么我不给计算中心反馈问题呢？**
+
+我之前曾多次就不同问题用不同手段与计算中心进行沟通，包括但不限于打电话、发邮件、BBS直接开骂以及线下直接对线等等。综合来说，线下对线的体验是非常好的，和老师聊天很开心，但结果必然是问题得不到任何解决。至于发邮件，我这边有一个问题被计算中心反复踢皮球高达3次的往来记录可供查阅。作为一个有追求的开发者，我在使用计算中心开发的诸多应用时都会感觉很痛苦，而反馈无效只会让我更加痛苦。所以最后我选择了直接摆烂，日常侮辱一下计算中心也是挺有意思的。
+
+## 如何科学白嫖某大学的DeepSeek接口
+
+### 观察官方调用格式
+
+访问某大学[DeepSeek服务](https://deepseek.pku.edu.cn/)，F12打开浏览器控制台，切换到Network选项卡，在页面上随便输一句话，观察到新出现了一个`sendQuery`请求，即为对应后端的SSE流式输出接口
+
+对应请求内容为：
+
+```json
+{
+  "conversation_id": "1741856607927-m4woicdsiy",
+	"api_key": "123456",
+	"messages": [
+		{
+			"role": "user",
+			"content": "你好"
+		}
+	],
+	"history": [],
+	"model": "deepseek-v3"
+}
+```
+
+发现关键鉴权参数为用户Cookie，请求中的`api_key`、`conversation_id`可有可无，其获取方式如下所示：
+
+![admin/QiEm97pZ.png](https://img-api.pku3d.com/ota/admin/QiEm97pZ.png)
+
+拿到cookie之后，我们就可以通过替换content内容的方式来直接请求学校deepseek的接口了。
+
+### 封装接口
+
+由于目前学校的接口并非OpenAI格式兼容的，此外并不需要`Authorization`头，所以我们需要自己封装一个中间接口，来把学校现有的接口转换成OpenAI Compatible的形式。
+
+注意需要解决前端跨域请求问题，我让AI简单写了一个，经过一番debug，最终得到如下代码：
+
+```ts filename="app/api/chat/completions/route.ts" copy
+import { NextRequest, NextResponse } from "next/server";
+import { headers } from 'next/headers'
+
+export async function POST(req: NextRequest) {
+  if (req.method !== "POST") {
+    return NextResponse.json("Method Not Allowed", { status: 405 });
+  }
+
+  const headerList = await headers();
+
+  // 从 Authorization 中提取用户提供的 API key，用于 Cookie token
+  let userApiKey = "";
+  const auth = headerList.get("authorization");
+  if (auth) {
+    const parts = auth.split(" ");
+    if (parts.length === 2) {
+      userApiKey = parts[1];
+    }
+  }
+
+  // 获取原始请求体文本
+  const body = await req.json();
+
+  const newbody = {
+    api_key: "123456",
+    model: body.model,
+    messages: body.messages,
+    history: []
+  }
+
+  // 构造转发请求的 header，其中 Cookie 使用用户 API key
+  const targetUrl = "https://deepseek.pku.edu.cn/api/sendQuery";
+  const forwardHeaders: HeadersInit = {
+    Accept: "*/*",
+    "Accept-Language": "en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7",
+    Authorization: "Bearer 123456",
+    "Cache-Control": "no-cache",
+    Connection: "keep-alive",
+    "Content-Type": "application/json",
+    Cookie: `token=${userApiKey}`,
+    Origin: "https://deepseek.pku.edu.cn",
+    Pragma: "no-cache",
+    Referer: "https://deepseek.pku.edu.cn/chat",
+    "Sec-Fetch-Dest": "empty",
+    "Sec-Fetch-Mode": "cors",
+    "Sec-Fetch-Site": "same-origin",
+    "User-Agent": req.headers.get("user-agent") || "",
+  };
+
+  const response = await fetch(targetUrl, {
+    method: "POST",
+    headers: forwardHeaders,
+    body: JSON.stringify(newbody),
+  })
+
+  // 构造新的返回 header 并覆盖为流式 SSE 格式
+  const newHeaders = new Headers();
+  response.headers.forEach((value, key) => {
+    newHeaders.set(key, value);
+  });
+  newHeaders.set("Content-Type", "text/event-stream");
+  // 添加允许跨域的 header
+  newHeaders.set("Access-Control-Allow-Origin", "*");
+
+  return new Response(response.body, {
+    status: response.status,
+    headers: newHeaders,
+  });
+}
+
+// CORS 预检请求
+export async function OPTIONS(req: NextRequest) {
+  return new NextResponse(null, {
+    status: 200,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization, x-stainless-timeout, x-stainless-os, x-stainless-runtime, x-stainless-arch, x-stainless-lang, x-stainless-package-version, x-stainless-runtime-version, x-stainless-retry-count",
+    },
+  });
+}
+```
+
+### 体验
+
+[lobechat](https://lobechat.pku3d.com/)项目具有极高的扩展性，经过版本更新，目前允许在前端直接配置API接口，所以我们采用这种方式进行体验：
+
+1. 点击左上角头像——设置——AI服务商，你会看到一系列已经启用的API服务，由于我们的接口是OpenAI Compatible的，故任意一个兼容OpenAI接口的服务商都可以使用，这里为了方便我们就去更改DeepSeek的接口，点击deepseek，会看到如下页面：
+
+![admin/qPXHbf9L.png](https://img-api.pku3d.com/ota/admin/qPXHbf9L.png)
+
+2. `API_KEY`填写为刚刚拿到的Cookie，具体是`token=xxxxxx`中的`xxxxxx`部分，API代理地址可以先用我在文档站部署的接口，具体为`https://docs.pku3d.com/api`，一定要**打开客户端请求模式**
+
+3. 由于某大学使用的deepseek-r1为开源部署版本，并不支持官方的命名方式，所以需要创建模型，点击模型列表“获取模型列表”右侧的加号，添加模型，**ID为`deepseek-r1`**，展示名称随意，上下文长度64k，其他选项不选，点击保存，例如：
+
+![admin/gOl3wGCW.png](https://img-api.pku3d.com/ota/admin/gOl3wGCW.png)
+
+4. 测试连通性，应该等待后能得到正常结果。之后回到聊天页面，就可以使用某大学部署的deepseek-r1进行对话了。由于使用的lobechat的前端，可以共享诸多能力，比如数学公式显示（舒服了）
+
+效果如图：
+
+![admin/7D9um2qC.png](https://img-api.pku3d.com/ota/admin/7D9um2qC.png)
+
+### 局限性
+
+- 由于某大学采用`conversation_id`来标识所属对话，目前上下文功能基本属于不可用状态，只能一问一答
+
+- 毕竟属于不太道德的白嫖方案，session令牌经常会过期，不适合长期使用
